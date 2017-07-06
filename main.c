@@ -14,6 +14,18 @@
 #include <string.h>
 #include "camera.h"
 
+
+int save(void* data, int size) {
+    static int i = 0;
+    char fn[128];
+    snprintf(fn, sizeof(fn), "./save-%03d.jpg", i++);
+    FILE* fp = fopen(fn, "w");
+    if (fp) {
+        fwrite(data, 1, size, fp);
+        fclose(fp);
+    }
+}
+
 int main(int argc, const char *argv[]) {
     int i = 0;
     int ret = 0;
@@ -31,6 +43,7 @@ int main(int argc, const char *argv[]) {
     for (i = 0; i < 10; i++) {
         memset(&frame, 0x00, sizeof(frame));
         ret = camera_dqueue_frame(c, &frame);
+        save(frame.data, frame.buf.length);
         ret = camera_queue_frame(c, &frame);
     }
 
