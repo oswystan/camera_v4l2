@@ -18,8 +18,10 @@ all: $(bin)
 
 $(bin): $(obj)
 	@gcc $^ -o $(bin)
+	@echo "GEN\t"$@
 
 %.o:%.c
+	@echo "gcc\t"$@
 	@gcc -c $< -o $@
 
 clean:

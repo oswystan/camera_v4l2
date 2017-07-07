@@ -107,7 +107,7 @@ static int camera_qbufs(camera_t* dev) {
 
 camera_t* camera_open(const char* dev) {
     logi("open camera %s", dev);
-    camera_t* c = malloc(sizeof(*c));
+    camera_t* c = (camera_t*)malloc(sizeof(*c));
     if (!c) {
         loge("fail to alloc memory");
         return NULL;
