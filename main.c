@@ -26,9 +26,16 @@ int save(void* data, int size) {
     }
 }
 
+unsigned long timeval2ul(struct timeval ts) {
+    return (ts.tv_sec * 1000) + (ts.tv_usec / 1000);
+}
+
 int main(int argc, const char *argv[]) {
     int i = 0;
     int ret = 0;
+
+    unsigned long last_ts = 0;
+    unsigned long cur_ts = 0;
 
     camera_t* c = camera_open("/dev/video0");
     if (!c) {
@@ -40,10 +47,14 @@ int main(int argc, const char *argv[]) {
     camera_streamon(c);
 
     camera_frame_t frame;
-    for (i = 0; i < 10; i++) {
+    for (i = 0; i < 100; i++) {
         memset(&frame, 0x00, sizeof(frame));
         ret = camera_dqueue_frame(c, &frame);
-        save(frame.data, frame.buf.length);
+        cur_ts = timeval2ul(frame.buf.timestamp);
+
+        printf("ts=%lu\n", cur_ts - last_ts);
+        last_ts = cur_ts;
+        /*save(frame.data, frame.buf.length);*/
         ret = camera_queue_frame(c, &frame);
     }
 

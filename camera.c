@@ -228,7 +228,6 @@ int camera_dqueue_frame(camera_t* dev, camera_frame_t* frame) {
     }
     /*logv("DQ => %d", frame->buf.index);*/
     frame->data = dev->bufs[frame->buf.index].data;
-    frame->buf = dev->bufs[frame->buf.index].buf;
     return 0;
 }
 
