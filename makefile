@@ -10,7 +10,7 @@
 .PHONY: all clean
 
 bin := camera
-src := main.c camera.c
+src := $(wildcard *.c)
 obj := $(patsubst %.c,%.o,$(src))
 ld_flags := -ludev
 
