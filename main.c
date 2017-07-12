@@ -37,17 +37,25 @@ int main(int argc, const char *argv[]) {
     unsigned long last_ts = 0;
     unsigned long cur_ts = 0;
 
-    camera_t* c = camera_open("/dev/video0");
+    camera_dev_t devs[10];
+    int cnt = 10;
+    ret = camera_enum_devices(devs, &cnt);
+    if (ret != 0 || cnt <= 0) {
+        printf("no v4l2 devices found\n");
+        return 0;
+    }
+
+    camera_t* c = camera_open(devs[0].path);
     if (!c) {
         return -1;
     }
 
-    camera_set_format(c, 640, 480, V4L2_PIX_FMT_MJPEG);
+    camera_set_format(c, 640, 480, V4L2_PIX_FMT_YUYV);
     camera_set_framerate(c, 30);
     camera_streamon(c);
 
     camera_frame_t frame;
-    for (i = 0; i < 100; i++) {
+    for (i = 0; i < 0xFFFFFFFF; i++) {
         memset(&frame, 0x00, sizeof(frame));
         ret = camera_dqueue_frame(c, &frame);
         cur_ts = timeval2ul(frame.buf.timestamp);

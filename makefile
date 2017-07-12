@@ -12,12 +12,13 @@
 bin := camera
 src := main.c camera.c
 obj := $(patsubst %.c,%.o,$(src))
+ld_flags := -ludev
 
 all: $(bin)
 
 
 $(bin): $(obj)
-	@gcc $^ -o $(bin)
+	@gcc $^ -o $(bin) $(ld_flags)
 	@echo "GEN\t"$@
 
 %.o:%.c

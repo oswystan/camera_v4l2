@@ -14,8 +14,17 @@
 #define CAMERA_H_INCLUDED
 
 #include <linux/videodev2.h>
+#include <stdint.h>
 
 #define BUF_CNT 6
+
+typedef struct _camera_dev_t {
+    char path[64];
+    uint32_t vendor;
+    uint32_t product;
+    uint64_t busnum;
+    uint64_t devnum;
+} camera_dev_t;
 
 typedef struct _camera_frame_t {
     int     idx;
@@ -29,6 +38,7 @@ typedef struct _camera_t {
     camera_frame_t bufs[BUF_CNT];
 } camera_t;
 
+int camera_enum_devices(camera_dev_t devs[], int* cnt);
 
 camera_t* camera_open(const char* dev);
 void camera_close(camera_t* dev);

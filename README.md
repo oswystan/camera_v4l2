@@ -5,6 +5,7 @@ A camera demo code used for uvc camera device
 ## install
 
 ```
+sudo apt-get install libudev-dev
 make 
 ```
 

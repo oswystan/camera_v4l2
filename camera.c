@@ -19,6 +19,7 @@
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
+#include <libudev.h>
 
 #include "camera.h"
 
@@ -37,6 +38,14 @@
         loge("null dev"); \
         return -1; \
     }
+
+static void camera_dump_dev(camera_dev_t* d) {
+    logv("dev: %s", d->path);
+    logv("\tvendor : %x", d->vendor);
+    logv("\tproduct: %x", d->product);
+    logv("\tbus    : %lu", d->busnum);
+    logv("\tdev    : %lu", d->devnum);
+}
 
 static int camera_mmap(camera_t* dev) {
     check_dev(dev);
@@ -103,6 +112,59 @@ static int camera_qbufs(camera_t* dev) {
     for (i = 0; i < BUF_CNT; i++) {
         camera_queue_frame(dev, &dev->bufs[i]);
     }
+}
+
+int camera_enum_devices(camera_dev_t devs[], int* cnt) {
+    int idx = 0;
+    int total = *cnt;
+
+    struct udev* udev = NULL;
+    struct udev_enumerate*  enumerate = NULL;
+    struct udev_list_entry* devices = NULL;
+    struct udev_list_entry* dev_list_entry = NULL;
+    struct udev_device *dev = NULL;
+    struct v4l2_capability v4l2_cap;
+
+    *cnt = 0;
+
+    udev = udev_new();
+    enumerate = udev_enumerate_new(udev);
+    udev_enumerate_add_match_subsystem(enumerate, "video4linux");
+    udev_enumerate_scan_devices(enumerate);
+    devices = udev_enumerate_get_list_entry(enumerate);
+
+    udev_list_entry_foreach(dev_list_entry, devices) {
+        const char *path, *dev_path;
+        path = udev_list_entry_get_name(dev_list_entry);
+        dev = udev_device_new_from_syspath(udev, path);
+        dev_path = udev_device_get_devnode(dev);
+        dev = udev_device_get_parent_with_subsystem_devtype(dev, "usb", "usb_device");
+        if (!dev) {
+            continue;
+        }
+
+        if (idx < total) {
+            snprintf(devs[idx].path, sizeof(devs[idx].path), "%s", dev_path);
+            devs[idx].vendor = strtoull(udev_device_get_sysattr_value(dev,"idVendor"), NULL, 16);
+            devs[idx].product = strtoull(udev_device_get_sysattr_value(dev,"idProduct"), NULL, 16);
+            devs[idx].busnum = strtoull(udev_device_get_sysattr_value(dev, "busnum"), NULL, 10);
+            devs[idx].devnum = strtoull(udev_device_get_sysattr_value(dev, "devnum"), NULL, 10);
+            camera_dump_dev(devs+idx);
+        } else {
+            loge("more uvc device found: %s", dev_path);
+        }
+        udev_device_unref(dev);
+        ++idx;
+    }
+    *cnt = idx;
+
+    if (enumerate) {
+        udev_enumerate_unref(enumerate);
+    }
+    if (udev) {
+        udev_unref(udev);
+    }
+    return 0;
 }
 
 camera_t* camera_open(const char* dev) {
