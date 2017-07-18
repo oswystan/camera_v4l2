@@ -12,7 +12,7 @@ make
 use the following command to convert yuv to jpeg
 
 ```
-ffmpeg -s 640x480  -pix_fmt yuyv422 -i xxx.yuv xxx.jpg
+for one in `ls *.yuv`; do echo $one; ffmpeg -s 1600x1200  -pix_fmt yuyv422 -i $one $one.jpg; done
 ```
 
 ## tips

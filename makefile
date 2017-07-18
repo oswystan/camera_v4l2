@@ -22,10 +22,12 @@ $(bin): $(obj)
 	@echo "GEN\t"$@
 
 %.o:%.c
-	@echo "gcc\t"$@
+	@echo "cc\t"$@
 	@gcc -c $< -o $@
 
 clean:
+	@echo "cleaning..."
 	@rm -f *.o *.yuv *.jpg $(bin)
+	@echo "done."
 
 #######################################################################

@@ -15,10 +15,10 @@
 #include "camera.h"
 
 
-int save(void* data, int size) {
+int save(void* data, int size, const char* suffix) {
     static int i = 0;
     char fn[128];
-    snprintf(fn, sizeof(fn), "./save-%03d.jpg", i++);
+    snprintf(fn, sizeof(fn), "./save-%03d.%s", i++, suffix);
     FILE* fp = fopen(fn, "w");
     if (fp) {
         fwrite(data, 1, size, fp);
@@ -50,19 +50,26 @@ int main(int argc, const char *argv[]) {
         return -1;
     }
 
-    camera_set_format(c, 640, 480, V4L2_PIX_FMT_YUYV);
-    camera_set_framerate(c, 30);
-    camera_streamon(c);
+    if (camera_set_format(c, 1600, 1200, V4L2_PIX_FMT_YUYV) != 0) {
+        return -1;
+    }
+    if (camera_set_framerate(c, 30) != 0) {
+        return -1;
+    }
+    ret = camera_streamon(c);
+    if (ret != 0) {
+        return ret;
+    }
 
     camera_frame_t frame;
-    for (i = 0; i < 0xFFFFFFFF; i++) {
+    for (i = 0; i < 0x10; i++) {
         memset(&frame, 0x00, sizeof(frame));
         ret = camera_dqueue_frame(c, &frame);
         cur_ts = timeval2ul(frame.buf.timestamp);
 
         printf("ts=%lu\n", cur_ts - last_ts);
         last_ts = cur_ts;
-        /*save(frame.data, frame.buf.length);*/
+        /*save(frame.data, frame.buf.length, "yuv");*/
         ret = camera_queue_frame(c, &frame);
     }
 

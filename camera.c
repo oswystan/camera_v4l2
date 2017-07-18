@@ -38,6 +38,51 @@
         loge("null dev"); \
         return -1; \
     }
+#define MK_FMT_DESC(v) {desc: #v, fmt: v}
+
+typedef struct _camera_format_desc {
+    const char* desc;
+    __u32 fmt;
+} camera_format_desc;
+
+static camera_format_desc g_fmtdesc[] = {
+    MK_FMT_DESC(V4L2_PIX_FMT_YUYV),
+    MK_FMT_DESC(V4L2_PIX_FMT_MJPEG),
+    MK_FMT_DESC(V4L2_PIX_FMT_JPEG),
+    MK_FMT_DESC(V4L2_PIX_FMT_H264),
+    MK_FMT_DESC(V4L2_PIX_FMT_YVYU),
+    MK_FMT_DESC(V4L2_PIX_FMT_UYVY),
+    MK_FMT_DESC(V4L2_PIX_FMT_YYUV),
+    MK_FMT_DESC(V4L2_PIX_FMT_Y41P),
+    MK_FMT_DESC(V4L2_PIX_FMT_GREY),
+    MK_FMT_DESC(V4L2_PIX_FMT_Y10BPACK),
+    MK_FMT_DESC(V4L2_PIX_FMT_Y16),
+    MK_FMT_DESC(V4L2_PIX_FMT_YUV420),
+    MK_FMT_DESC(V4L2_PIX_FMT_YVU420),
+    MK_FMT_DESC(V4L2_PIX_FMT_NV12),
+    MK_FMT_DESC(V4L2_PIX_FMT_NV21),
+    MK_FMT_DESC(V4L2_PIX_FMT_NV16),
+    MK_FMT_DESC(V4L2_PIX_FMT_NV61),
+    MK_FMT_DESC(V4L2_PIX_FMT_SPCA501),
+    MK_FMT_DESC(V4L2_PIX_FMT_SPCA505),
+    MK_FMT_DESC(V4L2_PIX_FMT_SPCA508),
+    MK_FMT_DESC(V4L2_PIX_FMT_SGBRG8),
+    MK_FMT_DESC(V4L2_PIX_FMT_SGRBG8),
+    MK_FMT_DESC(V4L2_PIX_FMT_SBGGR8),
+    MK_FMT_DESC(V4L2_PIX_FMT_SRGGB8),
+    MK_FMT_DESC(V4L2_PIX_FMT_RGB24),
+    MK_FMT_DESC(V4L2_PIX_FMT_BGR24),
+};
+
+static const char* camera_get_fmtdesc(__u32 fmt) {
+    unsigned int i=0;
+    for (i = 0; i < sizeof(g_fmtdesc)/sizeof(g_fmtdesc[0]); i++) {
+        if (fmt == g_fmtdesc[i].fmt) {
+            return g_fmtdesc[i].desc;
+        }
+    }
+    return "*UNKNOWN*";
+}
 
 static void camera_dump_dev(camera_dev_t* d) {
     logv("dev: %s", d->path);
@@ -215,8 +260,11 @@ int camera_set_format(camera_t* dev, unsigned int w, unsigned int h, unsigned in
         loge("fail to set format [%s]", strerror(errno));
         return errno;
     }
-    if (fmt.fmt.pix.pixelformat != pixel_fmt) {
-        loge("pixel format is not supported");
+    if (fmt.fmt.pix.pixelformat != pixel_fmt || fmt.fmt.pix.width != w ||
+            fmt.fmt.pix.height != h) {
+        loge("try configuration[%dx%d@%s] instead of[%dx%d@%s]",
+                fmt.fmt.pix.width, fmt.fmt.pix.height, camera_get_fmtdesc(fmt.fmt.pix.pixelformat),
+                w, h, camera_get_fmtdesc(pixel_fmt));
         return -1;
     }
     return 0;
