@@ -22,7 +22,7 @@ $(bin): $(obj)
 	@echo "[gen]\t"$@
 
 %.o:%.c
-	@echo "[cc]\t"$@
+	@echo "[ cc]\t"$@
 	@gcc -c $< -o $@
 
 clean:
