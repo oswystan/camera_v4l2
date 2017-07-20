@@ -11,22 +11,21 @@
 
 bin := camera
 src := $(wildcard *.c *.cpp)
-obj := $(patsubst %.c,%.o,$(src))
-obj := $(patsubst %.cpp,%.o,$(obj))
+obj := $(src:.c=.o)
+obj := $(obj:.cpp=.o)
 ld_flags := -ludev
 
 all: $(bin)
 
-
 $(bin): $(obj)
 	@gcc $^ -o $(bin) $(ld_flags)
-	@echo "[gen]\t"$@
+	@echo "[gen] "$@
 
 %.o:%.c
-	@echo "[ cc]\t"$@
+	@echo "[ cc] "$@
 	@gcc -c $< -o $@
 %.o:%.cpp
-	@echo "[cpp]\t"$@
+	@echo "[cpp] "$@
 	@g++ -c $< -o $@
 
 clean:
