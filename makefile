@@ -19,10 +19,10 @@ all: $(bin)
 
 $(bin): $(obj)
 	@gcc $^ -o $(bin) $(ld_flags)
-	@echo "GEN\t"$@
+	@echo "[gen]\t"$@
 
 %.o:%.c
-	@echo "cc\t"$@
+	@echo "[cc]\t"$@
 	@gcc -c $< -o $@
 
 clean:
