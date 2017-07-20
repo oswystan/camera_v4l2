@@ -10,8 +10,9 @@
 .PHONY: all clean
 
 bin := camera
-src := $(wildcard *.c)
+src := $(wildcard *.c *.cpp)
 obj := $(patsubst %.c,%.o,$(src))
+obj := $(patsubst %.cpp,%.o,$(obj))
 ld_flags := -ludev
 
 all: $(bin)
@@ -24,6 +25,9 @@ $(bin): $(obj)
 %.o:%.c
 	@echo "[ cc]\t"$@
 	@gcc -c $< -o $@
+%.o:%.cpp
+	@echo "[cpp]\t"$@
+	@g++ -c $< -o $@
 
 clean:
 	@echo "cleaning..."
