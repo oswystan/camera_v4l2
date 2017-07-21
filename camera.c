@@ -93,8 +93,6 @@ static void camera_dump_dev(camera_dev_t* d) {
 }
 
 static int camera_mmap(camera_t* dev) {
-    check_dev(dev);
-
     int i;
     camera_frame_t* frm = dev->bufs;
     for (i = 0; i < BUF_CNT; i++) {
@@ -108,12 +106,14 @@ static int camera_mmap(camera_t* dev) {
     return 0;
 }
 static int camera_munmap(camera_t* dev) {
-    check_dev(dev);
     int i;
     camera_frame_t* frm = dev->bufs;
     for (i = 0; i < BUF_CNT; i++) {
         if (frm[i].data) {
-            munmap(frm[i].data, frm[i].buf.length);
+            int ret = munmap(frm[i].data, frm[i].buf.length);
+            if (ret != 0) {
+                loge("fail to unmap buffer: %s", strerror(errno));
+            }
             frm[i].data = NULL;
         }
     }
@@ -147,9 +147,27 @@ static int camera_malloc(camera_t* dev) {
             loge("fail to query buffer [%s]", strerror(errno));
             return errno;
         }
-        logv("mem[%d]=%d, %d", i, frm[i].buf.length, frm[i].buf.m.offset);
     }
     return camera_mmap(dev);
+}
+
+static int camera_mfree(camera_t* dev) {
+    struct v4l2_requestbuffers req;
+    int ret = 0;
+
+    //unmap buffer first
+    camera_munmap(dev);
+
+    memset(&req, 0x00, sizeof(req));
+    req.count = 0;
+    req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    req.memory = V4L2_MEMORY_MMAP;
+    ret = ioctl(dev->fd, VIDIOC_REQBUFS, &req);
+    if (ret < 0) {
+        loge("fail to free buffer [%s]", strerror(errno));
+        return errno;
+    }
+    return 0;
 }
 
 static int camera_qbufs(camera_t* dev) {
@@ -301,10 +319,6 @@ int camera_streamon(camera_t* dev) {
     if ((ret = camera_malloc(dev)) != 0) {
         return ret;
     }
-    if ((ret = camera_mmap(dev)) != 0) {
-        camera_munmap(dev);
-        return ret;
-    }
     camera_qbufs(dev);
 
     ret = ioctl(dev->fd, VIDIOC_STREAMON, &type);
@@ -324,7 +338,7 @@ int camera_streamoff(camera_t* dev) {
         loge("fail to stream off [%s]", strerror(errno));
         return errno;
     }
-    return 0;
+    return camera_mfree(dev);
 }
 
 int camera_dqueue_frame(camera_t* dev, camera_frame_t* frame) {

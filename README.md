@@ -24,4 +24,7 @@ some useful commands:
 ```
 lsusb
 lsusb -v -d $vendor_id:$product_id
+
+## change timstamp to realtime
+su root -c "printf 'realtime' > /sys/module/uvcvideo/parameters/clock"
 ```
