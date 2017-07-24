@@ -285,6 +285,19 @@ int camera_set_format(camera_t* dev, unsigned int w, unsigned int h, unsigned in
                 w, h, camera_get_fmtdesc(pixel_fmt));
         return -1;
     }
+
+    dev->width  = w;
+    dev->height = h;
+    dev->format = pixel_fmt;
+    return 0;
+}
+
+int camera_get_format(camera_t* dev, unsigned int* w, unsigned int* h, unsigned int* fmt) {
+    check_dev(dev);
+
+    *w = dev->width;
+    *h = dev->height;
+    *fmt = dev->format;
     return 0;
 }
 

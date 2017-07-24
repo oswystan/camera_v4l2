@@ -35,6 +35,9 @@ typedef struct _camera_frame_t {
 typedef struct _camera_t {
     int fd;
     char name[64];
+    unsigned int width;
+    unsigned int height;
+    unsigned int format;
     camera_frame_t bufs[BUF_CNT];
 } camera_t;
 
@@ -44,6 +47,7 @@ camera_t* camera_open(const char* dev);
 void camera_close(camera_t* dev);
 
 int camera_set_format(camera_t* dev, unsigned int w, unsigned int h, unsigned int fmt);
+int camera_get_format(camera_t* dev, unsigned int* w, unsigned int* h, unsigned int* fmt);
 int camera_set_framerate(camera_t* dev, unsigned int fps);
 
 int camera_streamon(camera_t* dev);
