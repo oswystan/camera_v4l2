@@ -379,5 +379,11 @@ int camera_queue_frame(camera_t* dev, camera_frame_t* frame) {
     return 0;
 }
 
+uint64_t camera_get_us(struct timeval ts) {
+    return (ts.tv_sec * 1000000UL) + ts.tv_usec;
+}
+uint64_t camera_get_ms(struct timeval ts) {
+    return (ts.tv_sec * 1000UL) + (ts.tv_usec / 1000);
+}
 /********************************** END **********************************************/
 

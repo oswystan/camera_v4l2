@@ -26,10 +26,6 @@ int save(void* data, int size, const char* suffix) {
     }
 }
 
-unsigned long timeval2ul(struct timeval ts) {
-    return (ts.tv_sec * 1000) + (ts.tv_usec / 1000);
-}
-
 int main(int argc, const char *argv[]) {
     int i = 0;
     int ret = 0;
@@ -65,7 +61,7 @@ int main(int argc, const char *argv[]) {
     for (i = 0; i < 0x10; i++) {
         memset(&frame, 0x00, sizeof(frame));
         ret = camera_dqueue_frame(c, &frame);
-        cur_ts = timeval2ul(frame.buf.timestamp);
+        cur_ts = camera_get_ms(frame.buf.timestamp);
 
         printf("ts=%lu\n", cur_ts - last_ts);
         last_ts = cur_ts;

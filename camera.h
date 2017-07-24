@@ -56,6 +56,9 @@ int camera_streamoff(camera_t* dev);
 int camera_dqueue_frame(camera_t* dev, camera_frame_t* frame);
 int camera_queue_frame(camera_t* dev, camera_frame_t* frame);
 
+uint64_t camera_get_us(struct timeval ts);
+uint64_t camera_get_ms(struct timeval ts);
+
 #endif /*CAMERA_H_INCLUDED*/
 
 /********************************** END **********************************************/
