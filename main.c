@@ -46,10 +46,13 @@ int main(int argc, const char *argv[]) {
         return -1;
     }
 
-    if (camera_set_format(c, 1600, 1200, V4L2_PIX_FMT_YUYV) != 0) {
+    if (camera_set_format(c, 640, 480, V4L2_PIX_FMT_YUYV) != 0) {
         return -1;
     }
     if (camera_set_framerate(c, 30) != 0) {
+        return -1;
+    }
+    if (camera_set_exposure(c, 10) != 0) {
         return -1;
     }
     ret = camera_streamon(c);
@@ -65,7 +68,7 @@ int main(int argc, const char *argv[]) {
 
         printf("ts=%lu\n", cur_ts - last_ts);
         last_ts = cur_ts;
-        /*save(frame.data, frame.buf.length, "yuv");*/
+        save(frame.data, frame.buf.length, "yuv");
         ret = camera_queue_frame(c, &frame);
     }
 

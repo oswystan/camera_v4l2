@@ -324,6 +324,33 @@ int camera_set_framerate(camera_t* dev, unsigned int fps) {
     return 0;
 }
 
+int camera_set_exposure(camera_t* dev, unsigned int ms) {
+    check_dev(dev);
+
+    int ret = 0;
+    struct v4l2_ext_control ctrl[2];
+    struct v4l2_ext_controls ctrls;
+    memset(&ctrl, 0x00, sizeof(ctrl));
+    memset(&ctrls, 0x00, sizeof(ctrls));
+
+    ctrls.ctrl_class = V4L2_CTRL_CLASS_CAMERA;
+    ctrls.count = 2;
+    ctrls.controls = ctrl;
+
+    ctrl[0].id = V4L2_CID_EXPOSURE_AUTO;
+    ctrl[0].value = V4L2_EXPOSURE_MANUAL;
+    ctrl[1].id = V4L2_CID_EXPOSURE_ABSOLUTE;
+    ctrl[1].value = ms*10;
+
+    ret = ioctl(dev->fd, VIDIOC_S_EXT_CTRLS, &ctrls);
+    if (ret != 0) {
+        loge("fail to set exposure[%s]", strerror(errno));
+        return errno;
+    }
+
+    return 0;
+}
+
 int camera_streamon(camera_t* dev) {
     check_dev(dev);
 

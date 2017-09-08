@@ -49,6 +49,7 @@ void camera_close(camera_t* dev);
 int camera_set_format(camera_t* dev, unsigned int w, unsigned int h, unsigned int fmt);
 int camera_get_format(camera_t* dev, unsigned int* w, unsigned int* h, unsigned int* fmt);
 int camera_set_framerate(camera_t* dev, unsigned int fps);
+int camera_set_exposure(camera_t* dev, unsigned int ms);
 
 int camera_streamon(camera_t* dev);
 int camera_streamoff(camera_t* dev);
